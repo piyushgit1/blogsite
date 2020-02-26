@@ -1,0 +1,39 @@
+ .mover {
+
+
+   text-align:center;
+   margin-top: 10%;
+
+
+}
+
+.background{
+ background-image: url( '/static/img/blue-with-vignette-marble-texture-background-with-copy-space_23-2148327728.jpg') ;
+ background-repeat:no-repeat;
+background-size:100%;
+}
+
+.create{
+ text-align:center;
+    margin-top: 3%;
+    margin-left: 20%;
+
+
+}
+
+.origin{
+margin-top: -45px;
+margin-right: 30px;
+}
+
+
+.center{
+   padding:25px;
+   top:30%;
+  align: center;
+  left: 50%;
+  margin-left: 35%;
+  height: 200px;
+  width: 350px;
+  border:2px solid #000;
+}

@@ -1,0 +1,36 @@
+{%load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="stylesheet" type="text/css" href="{% static 'css/main.css' %}">
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body class="background">
+<h1 align="center">Login Page</h1>
+
+<form class="center"  method="POST" action= {% url 'blogapp:login' %} >
+{% csrf_token %}
+  <label for="fname">Username:</label>
+  <input type="text" id="fname" name="fname" ><br><br>
+  <label for="lname">Password: </label>
+    <input type="text" id="lname" name="lname"><br>
+    <div class="mover" >
+    <input type="submit" value="Login"/>
+
+
+
+
+</div>
+    <div>
+        <div class="create">
+        <a class="btn btn-primary" href="/blogapp/reg"><button type="button">Create Account</button></a></div>
+        <p class="origin" ><h5>Not Registerd?</h5> </p>
+
+
+    </div>
+</form>
+
+</body>
+</html>
