@@ -1,14 +1,38 @@
+from django.contrib.auth.models import AbstractUser
 from django.db import models
 
-
-class UserLogin(models.Model):
-    Username = models.CharField(max_length=50)
-    Password = models.CharField(max_length=50)
+STATUS = (("Publish", "Publish"), ("Repost", "Repost"))
 
 
-class Registration(models.Model):
-    Username1 = models.CharField(max_length=50)
-    Password2 = models.CharField(max_length=50)
-    # TODO: column name should not be in capital letter
-    # TODO: lean different type of model fields, like here it should be models.UrlField
-    Email = models.CharField(max_length=254)
+
+class Post(models.Model):
+    title = models.CharField(max_length=250, default='titile')
+    body = models.TextField(default="Write here")
+    updated_on = models.DateTimeField(auto_now=True)
+    created_on = models.DateTimeField(auto_now_add=True)
+    status = models.CharField(max_length=20, choices=STATUS, default=0)
+
+    class Meta:
+        ordering = ['-created_on']
+
+    def __str__(self):
+        return self.title
+
+class Comment(models.Model):
+    comment_key = models.ForeignKey(Post, null=True, on_delete=models.DO_NOTHING, related_name='Comment',
+                                 related_query_name='Commas')
+    commenter_name = models.CharField(max_length=20)
+    comment_body = models.CharField(max_length=1000)
+    comment_time = models.DateTimeField(auto_now=True)
+
+
+class Label(models.Model):
+    post_label = models.ForeignKey(Post, null=True, on_delete=models.DO_NOTHING)
+    label_name = models.CharField(max_length=200)
+
+
+class User(AbstractUser):
+    blog = models.ForeignKey(Post, null=True, on_delete=models.CASCADE,related_name="blog",related_query_name="blogging")
+
+    def get_short_name(self):
+        return self.username

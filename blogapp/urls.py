@@ -1,26 +1,30 @@
-from django.urls import include, path
-from rest_framework import routers
+from django.urls import path
+from drf_yasg import openapi
+from drf_yasg.views import get_schema_view
+from rest_framework.authtoken.views import obtain_auth_token
 
-from . import views
+from blogapp.views import Blog_get_post, User_get_post, Blog_update_delete,User_update_delete,string,CommentView
 
-router = routers.DefaultRouter()
-router.register(r'UserRecord', views.UserLoginViewset)
-router.register(r'Registration', views.UserRegistrationViewset)
+schema_view = get_schema_view(
+    openapi.Info(
+        title="Login views",
+        default_version='v1',
+    ),
+    public=True,
+
+)
 
 app_name = "blogapp"
 urlpatterns = [
-    # TODO: naming convention is very bad, learn how to name url according to rest framework guideline
+
     # TODO: https://pypi.org/project/django-environ/
 
-    path('api/', include(router.urls)),
-    path('ind', views.help.as_view()),
-    path('login', views.redirect.as_view(), name="login"),
-    path('api/UserRecored/<int:pk>/', views.UserLoginViewset),
-    path('regist', views.regpost.as_view(), name="regist"),
-    path('reg', views.your.as_view())
-    # path('get_post', views.View_Post_list.as_view()),
-    # path('post', views.poster),
-
-    #  path('put_delete/v1',views.update_delete_list.as_view()),
-
+    path('swagger', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
+    path('api-token-auth/', obtain_auth_token, name='api_token_auth'),
+    path('User_get_post/', User_get_post.as_view()),
+    path('User_update_delete/<email_address>', User_update_delete.as_view()),
+    path('Blog_get_post/<email_address>/', Blog_get_post.as_view()),
+    path('Blog_upd_del/<email_address>/<post_title>/', Blog_update_delete.as_view()),
+    path('Comments/<email_address>/<title_name>/', CommentView.as_view()),
+    path('stirng',string.as_view())
 ]
