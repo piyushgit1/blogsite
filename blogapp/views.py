@@ -1,137 +1,240 @@
-"""Creating of Views for the Rest api call
-
-First viewset created userloginviewset which perform the crud
-
-"""
-
+from django.core.mail import send_mail
+from django.db.models import Count
+from django.http import Http404
 from rest_framework import permissions
 from rest_framework.parsers import JSONParser
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from blogapp.permissions import IsPostOrIsAuthenticated
-from blogapp.models import User, Post, Comment
-from blogapp.serializer import UserLoginSerializer, UserRegisterSerializer, BlogSerializer, CommentSerializer
+from blogapp.models import User, Article, Comment
+from blogapp.serializer import UserLoginSerializer, UserRegisterSerializer, ArticleSerializer, CommentSerializer
+from blogsite.settings import EMAIL_HOST_USER
+
+"""####### USER LOGIN VIEW ##################   """
 
 
-################################################################################################################
+class UserLoginView(APIView):
+    """ Can view the registered account and update also delete"""
 
-class User_get_post(APIView):
-    permission_classes = [IsPostOrIsAuthenticated, ]
+    permission_classes = [permissions.IsAuthenticated]
 
-    def get(self, request):
+    def get_object(self, pk):
+        try:
+            return User.objects.get(pk=pk)
+        except User.DoesNotExist:
+            raise Http404
+
+    def get(self, request, pk, format=None):
+
         """ Used to get the username registered
         """
-        usernames = User.objects.all()
-        serializers = UserLoginSerializer(usernames, many=True)
-        return Response(request, serializers.data, status=203)
 
-    def post(self, request):
+        user_object = self.get_object(pk)
+        serializer = UserLoginSerializer(user_object)
+        return Response(serializer.data)
+
+    def put(self, request, pk, format=None):
+
         """takes the data and provide the input"""
+
+        data = JSONParser().parse(request)
+        user_obj = self.get_object(pk)
+        serializer = UserLoginSerializer(user_obj, data=data, partial=True)
+        if serializer.is_valid(raise_exception=True):
+            serializer.save()
+        return Response(serializer.data)
+
+    def delete(self, request, pk, format=None):
+
+        """ Delete the requested Userobject present in the database """
+        user_obj = self.get_object(pk)
+        username = user_obj.username
+        user_obj.delete()
+        return Response("Successfully Deleted {},Redirect to Login Page".format(username))
+
+
+class UserRegisterView(APIView):
+    permission_classes = [permissions.AllowAny]
+
+    """ For registration purpose only """
+
+    def post(self, request, format=None):
+        """
+        Register the user
+        """
+
         data = JSONParser().parse(request)
         serializer = UserRegisterSerializer(data=data)
         if serializer.is_valid(raise_exception=True):
             serializer.save()
+        send_mail("{} Registerd ".format(data['username']),
+                  "Visit to website", EMAIL_HOST_USER, [data['email']], fail_silently=False)
         return Response(serializer.data, status=201)
 
 
-class User_update_delete(APIView):
+""" #################### ARTICLE VIEWSET ############################## """
+
+
+class ArticlePost(APIView):
+    """
+        Article Register is done
+    """
     permission_classes = [permissions.IsAuthenticated]
-    """ used to update and delete any user """
 
-    def put(self, request, email_address):
-        """
-        updates the profile of the user
-        """
-
+    def post(self, request, pk, format=None):
         data = JSONParser().parse(request)
-        user_obj = User.objects.get(email=email_address)
-        serializer = UserRegisterSerializer(user_obj, data=data)
-        if serializer.is_valid():
-            serializer.save()
-        return Response(serializer.data, status=201)
-
-    def delete(self, request, email_address):
-        user_obj = User.objects.get(email=email_address)
-        user_name = user_obj.username
-        user_obj.delete()
-        return Response({user_name}, "deleted successfully")
-
-
-#####################################################################################################################
-
-class Blog_get_post(APIView):
-    """
-    Use to Provide the Create, retreive , update and delete
-    """
-    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
-
-    def get(self, request):
-        blogcontent = Post.objects.all()
-        serializers = BlogSerializer(blogcontent, many=True)
-        return Response(serializers.data, status=203)
-
-    def post(self, request):
-        data = JSONParser().parse(request)
-        serializer = BlogSerializer(data=data)
+        data['users'] = pk
+        serializer = ArticleSerializer(data=data)
         if serializer.is_valid(raise_exception=True):
             serializer.save()
         return Response(serializer.data, status=201)
 
 
-class Blog_update_delete(APIView):
-    permission_classes = [permissions.IsAuthenticated, ]
-
-
-""" Email address is used to filter particular post made by user as many user can have same username
-    Post_title will filter that post with the given title"""
-
-
-def put(self, request, email_address, post_title):
-    data = JSONParser().parse(request)
-    obj = Post.objects.filter(blogging__email=email_address, title=post_title)
-    serializer = BlogSerializer(obj, data=data)
-    if serializer.is_valid():
-        serializer.save()
-    return Response(serializer.data, status=201)
-
-
-def delete(self, request, email_address, post_title):
-    obj = Post.objects.filter(blogging__email=email_address, title=post_title)
-    obj.delete()
-    return Response("Object Deleted")
-
-
-######################################################################################################################
-
-class CommentView(APIView):
-    """
-      Comment viewset for crud
-    """
+class ArticleGPDView(APIView):
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 
-    def get(self, request):
-        data = Post.objects.filter(Commas__comment_key_id=1)
-        serializer = BlogSerializer(data, many=True)
-        return Response(serializer.data)
+    """ Get Put and Delete the Article by a user"""
 
-    def post(self, request, title_name):
+    def get_object(self, pk, format=None):
+        try:
+            return Article.objects.get(pk=pk)
+        except Article.DoesNotExist:
+            raise Http404
+
+    def get(self, request, pk, format=None):
+        article_obj = self.get_object(pk)
+        serializers = ArticleSerializer(article_obj)
+        return Response(serializers.data, status=203)
+
+    def put(self, request, pk, format=None):
         data = JSONParser().parse(request)
-        obj = Post.objects.get(title=title_name)
-        Comment_object_creator = Comment.objects.create(comment_key=obj)
-        serializer = CommentSerializer(Comment_object_creator, data=data)
+        article_obj = self.get_object(pk)
+        serializer = ArticleSerializer(article_obj, data=data, partial=True)
         if serializer.is_valid():
             serializer.save()
-            return Response(serializer.data, status=201)
+        return Response(serializer.data)
+
+    def delete(self, request, pk, format=None):
+        article_obj = self.get_object(pk)
+        article_username = article_obj.title
+        article_obj.delete()
+        return Response("{} successfully deleted".format(article_username))
+
+
+class ArticleDraft(APIView):
+    """ Provide the response bassed on status
+        two status are present 1.draft 2.publish for article """
+
+    def get(self, request, pk, format=None):
+        article_obj_status = Article.objects.filter(users_id=pk, status='Draft')
+        serializer = ArticleSerializer(article_obj_status, many=True)
+        return Response(serializer.data, status=201)
+
+
+class ArticlePublished(APIView):
+    """ Provide the response bassed on status
+        two status are present 1.draft 2.publish for article """
+
+    def get(self, request, pk, format=None):
+        article_obj_status = Article.objects.filter(users_id=pk, status='Publish')
+        serializer = ArticleSerializer(article_obj_status, many=True)
+        return Response(serializer.data, status=201)
+
+
+class ArticleRegisterdOneUser(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    """ Total number of article return by one user"""
+
+    def get_object(self, pk, format=None):
+        try:
+            User.objects.filter(pk=pk)
+        except User.DoesNotExist:
+            raise Http404
+
+    def get(self, request, pk, format=None):
+        Article_obj_all = Article.objects.filter(users_id=pk)
+        serializer = ArticleSerializer(Article_obj_all, many=True)
+        return Response(serializer.data, status=201)
+
+
+""" #################### COMMENT VIEWSETE ############################## """
+
+
+class CommentPost(APIView):
+    """
+        Comment Post is done for any article
+    """
+    permission_classes = [permissions.AllowAny]
+
+    def post(self, request, pk, format=None):
+        data = JSONParser().parse(request)
+        data['articles'] = pk
+        serializer = CommentSerializer(data=data)
+        if serializer.is_valid(raise_exception=True):
+            serializer.save()
+        return Response(serializer.data, status=201)
         return Response(serializer.errors, status=400)
 
 
-# class Comment_update_delete(APIView):
+class CommentFilterPublish(APIView):
+    """
+        Comment are filterd by based on status and all Published comment by a user on all article returns
 
-#  def put(self,request,post_title):
+    """
+    permission_classes = [permissions.AllowAny]
+
+    def get(self, request, pk, format=None):
+        b = Comment.objects.filter(articles__users__pk=pk, comment_choice='Publish')
+        serializer = CommentSerializer(b, many=True)
+        return Response(serializer.data)
 
 
-class string(APIView):
+class CommentFilterSpam(APIView):
+    """ all spam comments on all artilce by a user"""
+    permission_classes = [permissions.AllowAny]
 
-    def get(self, request):
-        username = "hi"
-        return Response(username)
+    def get(self, request, pk, format=None):
+        comment_obj = Comment.objects.filter(articles__users__pk=pk, comment_choice='Spam')
+        serializer = CommentSerializer(comment_obj, many=True)
+        return Response(serializer.data)
+
+
+class CommentUD(APIView):
+    """
+     To delete and update the comment
+    """
+
+    def put(self, request, pk, format=None):
+        data = JSONParser().parse(request)
+        comment_obj = Comment.objects.get(pk=pk)
+        serializer = CommentSerializer(comment_obj, data=data)
+        if serializer.is_valid(raise_exception=True):
+            serializer.save()
+        return Response(serializer.data)
+
+    def delete(self, request, pk):
+        comment_obj = Comment.objects.filter(pk=pk)
+        comment_obj.delete()
+        return Response("Comment Deleted")
+
+
+class LabelReturnAll(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    """ It returns the article grouped label with same value and have couted part assigned """
+
+    def get(self, request, pk, format=None):
+        response = Article.objects.filter(users__pk=pk)
+        v = response.values('Label').order_by('Label').annotate(counts=Count('Label'))
+        return Response(v, status=201)
+
+
+class LableReturnViewByName(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+    """ Gives the article object based on label"""
+
+
+    def get(self, request, pk, Label, format=None):
+        Label_obj = Article.objects.filter(users__pk=pk, Label=Label)
+        serializer = ArticleSerializer(Label_obj, many=True)
+        return Response(serializer.data)

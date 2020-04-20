@@ -2,7 +2,7 @@ from django.contrib.auth.hashers import make_password
 from django.contrib.auth.password_validation import validate_password
 from rest_framework import serializers
 
-from blogapp.models import User, Post, Comment
+from blogapp.models import User, Article, Comment
 
 
 class UserRegisterSerializer(serializers.ModelSerializer):
@@ -12,14 +12,9 @@ class UserRegisterSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ['id', 'username', 'password', 'email']
+        fields = ['id', 'first_name', 'last_name', 'username', 'password', 'email']
 
     def validate_password(self, password):
-        """
-        Method to validate password
-        :param value:
-        :return::
-        """
         validate_password(password=password)
         return make_password(password)
 
@@ -31,17 +26,20 @@ class UserLoginSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ['id', 'username', 'password', 'email']
+        fields = ['id', 'first_name', 'last_name', 'username', 'password', 'email']
+
+    def validate_password(self, password):
+        validate_password(password=password)
+        return make_password(password)
 
 
-class BlogSerializer(serializers.ModelSerializer):
+class ArticleSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Post
-        fields = ['id', 'title', 'body', 'updated_on', 'created_on', 'status']
+        model = Article
+        fields = ['id', 'title', 'Label', 'body', 'updated_on', 'created_on', 'status', 'users']
 
 
 class CommentSerializer(serializers.ModelSerializer):
-
     class Meta:
-     model = Comment
-     fields = ['id', 'commenter_name', 'comment_body', 'comment_time']
+        model = Comment
+        fields = ['id', 'commenter_name', 'comment_body', 'comment_time', 'comment_choice', 'articles']

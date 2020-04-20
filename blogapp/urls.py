@@ -2,8 +2,11 @@ from django.urls import path
 from drf_yasg import openapi
 from drf_yasg.views import get_schema_view
 from rest_framework.authtoken.views import obtain_auth_token
+from rest_framework.urlpatterns import format_suffix_patterns
 
-from blogapp.views import Blog_get_post, User_get_post, Blog_update_delete,User_update_delete,string,CommentView
+from blogapp.views import UserLoginView, UserRegisterView, ArticleGPDView, ArticlePublished, ArticleDraft, \
+    ArticleRegisterdOneUser, ArticlePost, CommentPost, CommentFilterPublish, CommentFilterSpam, CommentUD, \
+    LabelReturnAll, LableReturnViewByName
 
 schema_view = get_schema_view(
     openapi.Info(
@@ -21,10 +24,21 @@ urlpatterns = [
 
     path('swagger', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
     path('api-token-auth/', obtain_auth_token, name='api_token_auth'),
-    path('User_get_post/', User_get_post.as_view()),
-    path('User_update_delete/<email_address>', User_update_delete.as_view()),
-    path('Blog_get_post/<email_address>/', Blog_get_post.as_view()),
-    path('Blog_upd_del/<email_address>/<post_title>/', Blog_update_delete.as_view()),
-    path('Comments/<email_address>/<title_name>/', CommentView.as_view()),
-    path('stirng',string.as_view())
+    path('UserLoginView/<int:pk>/', UserLoginView.as_view()),
+    path('UserLoginView/', UserLoginView.as_view()),
+    path('UserRegisterView/', UserRegisterView.as_view()),
+    path('ArticleGPDView/<int:pk>/', ArticleGPDView.as_view()),
+    path('ArticlePublished/<int:pk>/', ArticlePublished.as_view()),
+    path('ArticleDraft/<int:pk>/', ArticleDraft.as_view()),
+    path('ArticleRegisterdOneUser/<int:pk>/', ArticleRegisterdOneUser.as_view()),
+    path('ArticlePost/<int:pk>/', ArticlePost.as_view()),
+    path('CommentPost/<int:pk>/', CommentPost.as_view()),
+    path('CommentFilterPublish/<int:pk>/', CommentFilterPublish.as_view()),
+    path('CommentFilterSpam/<int:pk>/', CommentFilterSpam.as_view()),
+    path('CommentUD/<int:pk>/', CommentUD.as_view()),
+    path('LabelReturnAll/<int:pk>/', LabelReturnAll.as_view()),
+    path('LableReturnViewByName/<int:pk>/<Label>/', LableReturnViewByName.as_view())
+
 ]
+
+urlpatterns = format_suffix_patterns(urlpatterns)

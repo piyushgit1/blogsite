@@ -13,18 +13,20 @@ https://docs.djangoproject.com/en/3.0/ref/settings/
 import os
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
-import export as export
 
-import blogsite
+
+
+from my_secrets import secrets
+
+SECRET_KEY = secrets.SECRET_KEY
+
+
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/3.0/howto/deployment/checklist/
 
-# SECURITY WARNING: keep the secret key used in production secret!
-# SECRET_KEY = os.environ['SECRET_KEY']
-SECRET_KEY = 'fjrs%+590z)5gsbl@zilr2c&e+1@d5-wol(3u@p5%-wny^(+_h'
+
+
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -47,10 +49,6 @@ REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.AllowAny'],
 
-    'DEFAULT_PERMISSION_CLASSES': (
-        'blogapp.permissions.IsPostOrIsAuthenticated',
-    )
-
 }
 
 INSTALLED_APPS = [
@@ -64,6 +62,8 @@ INSTALLED_APPS = [
     'drf_yasg',
     'rest_framework.authtoken',
     'blogapp',
+    'django_secrets',
+
 ]
 
 MIDDLEWARE = [
@@ -141,8 +141,15 @@ USE_I18N = True
 USE_L10N = True
 
 USE_TZ = True
-
+from blogapp.password import password
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.0/howto/static-files/
 
 STATIC_URL = '/static/'
+
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_USE_TLS = True
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_HOST_USER = 'prc3060@gmail.com'
+EMAIL_HOST_PASSWORD = password
+EMAIL_PORT = 587
