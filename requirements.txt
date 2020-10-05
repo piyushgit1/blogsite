@@ -1,0 +1,5 @@
+djangorestframework==3.11.0
+Django==3.0.2
+django-secrets
+drf_yasg
+psycopg2
