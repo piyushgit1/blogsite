@@ -14,7 +14,8 @@ import os
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 
-
+from dotenv import load_dotenv
+load_dotenv()
 
 from my_secrets import secrets
 
@@ -96,13 +97,15 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'blogsite.wsgi.application'
 
-# Database
+# 
+
+
 # https://docs.djangoproject.com/en/3.0/ref/settings/#databases
 
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'users',
+        'NAME': 'users', 
         'USER': 'bloger',
         'PASSWORD': 'passing',
         'HOST': 'localhost',

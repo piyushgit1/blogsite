@@ -9,7 +9,8 @@ from blogapp.models import User, Article, Comment
 from blogapp.serializer import UserLoginSerializer, UserRegisterSerializer, ArticleSerializer, CommentSerializer
 from blogsite.settings import EMAIL_HOST_USER
 
-"""####### USER LOGIN VIEW ##################   """
+"""####### 
+ LOGIN VIEW ##################   """
 
 
 class UserLoginView(APIView):
