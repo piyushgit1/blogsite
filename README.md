@@ -1,4 +1,2 @@
-#blogger app
-
-This is app for blogging .
-
+# blogsite
+This is the repostiory for blogging site

@@ -1,5 +1,6 @@
 djangorestframework==3.11.0
-Django==3.0.7
+Django==3.0.2
 django-secrets
 drf_yasg
 psycopg2
+python-dotenv-0.14.0

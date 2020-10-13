@@ -1,0 +1,7 @@
+.env
+blogapp/tests.py
+blogapp/__init__.py
+blogsite/__init__.py
+.idea/
+venv/
+my_secrets
